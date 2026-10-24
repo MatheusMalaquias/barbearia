@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navalha &amp; Cia — Barbearia</title>
+<meta name="description" content="Corte, barba e atitude. Veja os serviços, os horários e agende pelo WhatsApp em menos de um minuto.">
+<meta property="og:title" content="Navalha & Cia — Barbearia">
+<meta property="og:description" content="Corte, barba e atitude. Agende seu horário pelo WhatsApp.">
+<meta name="theme-color" content="#0E0E10">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="progresso" aria-hidden="true"></div>
+
+<header class="topo" id="topo">
+  <a class="marca" href="#inicio" aria-label="Navalha e Cia, início">NAVALHA <span>&amp;</span> CIA</a>
+  <nav class="menu" id="menu" aria-label="Seções">
+    <a href="#servicos">Serviços</a>
+    <a href="#equipe">Equipe</a>
+    <a href="#horarios">Horários</a>
+    <a href="#contato">Onde estamos</a>
+    <a class="btn btn-mini" href="#agendar">Agendar</a>
+  </nav>
+  <button class="burger" id="burger" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div class="hero-sticky">
+      <div class="hero-fundo" aria-hidden="true"></div>
+      <div class="poste" aria-hidden="true"><div></div></div>
+      <div class="hero-conteudo">
+        <p class="selo"><span class="ponto" aria-hidden="true"></span> <span id="statusAberto">Horário de hoje</span></p>
+        <h1><span>Corte.</span> <span>Barba.</span> <span class="dourado">Atitude.</span></h1>
+        <p class="sub">Toalha quente, navalha afiada e hora marcada. Sem fila, sem enrolação.</p>
+        <div class="acoes">
+          <a class="btn btn-ouro" href="#agendar">Agendar horário</a>
+          <a class="btn btn-borda" href="#servicos">Ver serviços</a>
+        </div>
+      </div>
+      <a class="rolar" href="#servicos" aria-label="Rolar para os serviços"><span></span></a>
+    </div>
+  </section>
+
+  <!-- DIFERENCIAIS -->
+  <section class="faixa" aria-label="Diferenciais">
+    <ul>
+      <li>Hora marcada</li><li>Toalha quente</li><li>Navalha na nuca</li><li>Cerveja ou café</li><li>Pagamento por Pix</li>
+    </ul>
+  </section>
+
+  <!-- SERVIÇOS -->
+  <section class="secao" id="servicos">
+    <div class="wrap">
+      <p class="eyebrow rv">Serviços</p>
+      <h2 class="rv">O que fazemos de melhor</h2>
+      <ul class="servicos" id="listaServicos"></ul>
+      <p class="nota rv">Valores de exemplo. Edite a lista no arquivo <code>script.js</code>.</p>
+    </div>
+  </section>
+
+  <!-- EQUIPE -->
+  <section class="secao escura" id="equipe">
+    <div class="wrap">
+      <p class="eyebrow rv">Equipe</p>
+      <h2 class="rv">Quem cuida do seu visual</h2>
+      <ul class="equipe" id="listaEquipe"></ul>
+    </div>
+  </section>
+
+  <!-- HORÁRIOS -->
+  <section class="secao" id="horarios">
+    <div class="wrap duas">
+      <div>
+        <p class="eyebrow rv">Horários</p>
+        <h2 class="rv">Quando abrimos</h2>
+        <p class="rv txt">Atendemos <strong>somente com hora marcada</strong>, para você não esperar. Chegou antes? Tem café e sinuca.</p>
+      </div>
+      <table class="tabela rv" aria-label="Horário de funcionamento">
+        <tbody id="tabelaHorarios"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- AGENDAR -->
+  <section class="secao escura" id="agendar">
+    <div class="wrap estreito">
+      <p class="eyebrow rv">Agendamento</p>
+      <h2 class="rv">Marque em menos de um minuto</h2>
+      <p class="rv txt">Escolha o serviço e o horário. Ao enviar, abrimos o WhatsApp com a mensagem pronta; a confirmação vem na hora.</p>
+      <form class="form rv" id="form" novalidate>
+        <div class="campo">
+          <label for="nome">Seu nome</label>
+          <input id="nome" name="nome" type="text" autocomplete="name" required minlength="2" placeholder="Como podemos te chamar?">
+        </div>
+        <div class="campo">
+          <label for="servico">Serviço</label>
+          <select id="servico" name="servico" required></select>
+        </div>
+        <div class="campo">
+          <label for="barbeiro">Barbeiro</label>
+          <select id="barbeiro" name="barbeiro"></select>
+        </div>
+        <div class="linha">
+          <div class="campo">
+            <label for="data">Data</label>
+            <input id="data" name="data" type="date" required>
+          </div>
+          <div class="campo">
+            <label for="hora">Horário</label>
+            <select id="hora" name="hora" required></select>
+          </div>
+        </div>
+        <p class="resumo" id="resumo" role="status" aria-live="polite"></p>
+        <p class="erro" id="erro" role="alert" hidden></p>
+        <button class="btn btn-ouro cheio" type="submit">Agendar pelo WhatsApp</button>
+        <p class="aviso">O horário só é garantido após a confirmação da barbearia.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- CONTATO -->
+  <section class="secao" id="contato">
+    <div class="wrap duas">
+      <div>
+        <p class="eyebrow rv">Onde estamos</p>
+        <h2 class="rv">Passa aqui</h2>
+        <address class="rv txt">
+          <span id="endereco">Rua Exemplo, 123 — Centro</span><br>
+          <span id="cidade">São Paulo, SP</span>
+        </address>
+        <div class="acoes rv">
+          <a class="btn btn-ouro" id="linkMapa" href="#" target="_blank" rel="noopener">Abrir no mapa</a>
+          <a class="btn btn-borda" id="linkZap" href="#" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+        </div>
+      </div>
+      <div class="mapa rv" aria-hidden="true">
+        <svg viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+          <rect width="400" height="260" fill="#17171A"/>
+          <g stroke="#2A2A30" stroke-width="10" fill="none" stroke-linecap="round">
+            <path d="M-10 90H410M-10 180H410M90 -10V270M230 -10V270M330 -10V270"/>
+          </g>
+          <g stroke="#C8A15A" stroke-width="3" fill="none" opacity=".7"><path d="M-10 180H230V90H410"/></g>
+          <g transform="translate(230 90)"><circle r="22" fill="#C8A15A" opacity=".18"/><circle r="9" fill="#C8A15A"/></g>
+        </svg>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p>© <span id="ano"></span> Navalha &amp; Cia. Página de demonstração.</p>
+</footer>
+
+<a class="flutuante" id="zapFlutuante" href="#agendar" aria-label="Agendar horário">Agendar</a>
+
+<script src="script.js"></script>
+</body>
+</html>
