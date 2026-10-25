@@ -27,6 +27,8 @@ Para trocar cores, edite as variáveis no início do `style.css` (`--ouro`, `--b
 - **Sem depoimentos nem números inventados:** a página não afirma o que não pode comprovar. Adicione avaliações reais quando existirem.
 - **Sem fotos de terceiros:** o mapa e o visual são SVG/CSS. Troque por fotos reais da barbearia quando tiver.
 
+- **Conteúdo nunca fica preso atrás de animação (D3):** as animações de entrada só escondem o conteúdo enquanto o JavaScript confirma que está funcionando. Se o script falhar (ou o navegador usar um `script.js` antigo em cache), depois de 2,5 s a página mostra tudo sem animação. Os arquivos de CSS e JS têm versão na URL (`?v=3`) para evitar cache velho; ao mudar um deles, aumente o número.
+
 ## Próximos passos
 - Galeria com fotos reais dos trabalhos
 - Agenda ao vivo: reservas gravadas em um banco, para o horário sumir assim que alguém reserva (ver o `cardapio-digital` como referência de Supabase + RLS)

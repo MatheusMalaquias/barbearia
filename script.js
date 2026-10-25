@@ -68,6 +68,43 @@ $("#ano").textContent = new Date().getFullYear();
   else { el.textContent = h ? `Fechado agora · hoje ${h[0]} às ${h[1]}` : "Fechado hoje"; el.parentElement.classList.add("fechado"); }
 })();
 
+/* ===== Movimento ligado ao scroll ===== */
+const hero = $("#inicio"), topo = $("#topo"), flutuante = $("#zapFlutuante");
+let ticking = false;
+function aoRolar() {
+  ticking = false;
+  const vh = innerHeight, sy = scrollY;
+  const p = reduzir ? 0 : Math.min(1, Math.max(0, sy / Math.max(1, hero.offsetHeight - vh)));
+  hero.style.setProperty("--p", p.toFixed(3));
+  document.documentElement.style.setProperty("--sp", (sy / Math.max(1, document.documentElement.scrollHeight - vh)).toFixed(3));
+  topo.classList.toggle("solido", sy > 40);
+  const aposHero = sy > hero.offsetHeight - vh;
+  const noForm = $("#agendar").getBoundingClientRect().top < vh * 0.8 && $("#agendar").getBoundingClientRect().bottom > 0;
+  flutuante.classList.toggle("visivel", aposHero && !noForm);
+}
+addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(aoRolar); } }, { passive: true });
+addEventListener("resize", aoRolar);
+aoRolar();
+
+const io = !("IntersectionObserver" in window) ? { observe: (n) => n.classList.add("in"), unobserve() {} } : new IntersectionObserver((es) => es.forEach((e) => {
+  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+}), { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+document.querySelectorAll(".rv").forEach((n) => io.observe(n));
+window.__animacaoOk = true;   // confirma ao HTML que as animações de entrada estão ativas
+
+/* menu mobile */
+const burger = $("#burger"), menu = $("#menu");
+burger.addEventListener("click", () => {
+  const aberto = menu.classList.toggle("aberto");
+  burger.setAttribute("aria-expanded", aberto);
+  burger.setAttribute("aria-label", aberto ? "Fechar menu" : "Abrir menu");
+});
+menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => {
+  menu.classList.remove("aberto"); burger.setAttribute("aria-expanded", false);
+}));
+
+/* Se algo falhar no formulário, o resto da página continua funcionando */
+try {
 /* ===== Formulário: dia e horários livres ===== */
 const selServ = $("#servico"), selBarb = $("#barbeiro"), boxDias = $("#dias"), boxHoras = $("#horas");
 selServ.innerHTML = CONFIG.servicos.map((s, i) => `<option value="${i}">${s.nome} — ${brl(s.preco)}</option>`).join("");
@@ -130,7 +167,7 @@ function desenharHoras() {
   if (!livres.some((x) => x.hora === estado.hora)) estado.hora = "";
   const periodo = (h) => (minutos(h) < 12 * 60 ? "Manhã" : minutos(h) < 18 * 60 ? "Tarde" : "Noite");
   const grupos = {};
-  lista.forEach((x) => (grupos[periodo(x.hora)] ||= []).push(x));
+  lista.forEach((x) => (grupos[periodo(x.hora)] = grupos[periodo(x.hora)] || []).push(x));
   boxHoras.innerHTML = Object.entries(grupos).map(([nome, itens]) => `
     <p class="periodo">${nome}</p>
     <div class="horas">${itens.map((x) => `
@@ -187,36 +224,9 @@ $("#form").addEventListener("submit", (e) => {
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
 });
 
-/* ===== Movimento ligado ao scroll ===== */
-const hero = $("#inicio"), topo = $("#topo"), flutuante = $("#zapFlutuante");
-let ticking = false;
-function aoRolar() {
-  ticking = false;
-  const vh = innerHeight, sy = scrollY;
-  const p = reduzir ? 0 : Math.min(1, Math.max(0, sy / Math.max(1, hero.offsetHeight - vh)));
-  hero.style.setProperty("--p", p.toFixed(3));
-  document.documentElement.style.setProperty("--sp", (sy / Math.max(1, document.documentElement.scrollHeight - vh)).toFixed(3));
-  topo.classList.toggle("solido", sy > 40);
-  const aposHero = sy > hero.offsetHeight - vh;
-  const noForm = $("#agendar").getBoundingClientRect().top < vh * 0.8 && $("#agendar").getBoundingClientRect().bottom > 0;
-  flutuante.classList.toggle("visivel", aposHero && !noForm);
+} catch (err) {
+  console.error("Erro no agendamento:", err);
+  const e = document.getElementById("erro");
+  e.textContent = "Não foi possível carregar os horários. Chame a barbearia no WhatsApp.";
+  e.hidden = false;
 }
-addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(aoRolar); } }, { passive: true });
-addEventListener("resize", aoRolar);
-aoRolar();
-
-const io = new IntersectionObserver((es) => es.forEach((e) => {
-  if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
-}), { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
-document.querySelectorAll(".rv").forEach((n) => io.observe(n));
-
-/* menu mobile */
-const burger = $("#burger"), menu = $("#menu");
-burger.addEventListener("click", () => {
-  const aberto = menu.classList.toggle("aberto");
-  burger.setAttribute("aria-expanded", aberto);
-  burger.setAttribute("aria-label", aberto ? "Fechar menu" : "Abrir menu");
-});
-menu.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => {
-  menu.classList.remove("aberto"); burger.setAttribute("aria-expanded", false);
-}));

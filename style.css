@@ -88,8 +88,8 @@ code{background:var(--card);padding:2px 6px;border-radius:6px}
 address{font-style:normal}
 
 /* revelação ao rolar */
-.rv{opacity:0;transform:translateY(34px);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0ms)}
-.rv.in{opacity:1;transform:none}
+.js .rv{opacity:0;transform:translateY(34px);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0ms)}
+.js .rv.in{opacity:1;transform:none}
 
 /* serviços */
 .servicos{list-style:none;display:grid;gap:14px;grid-template-columns:1fr;margin-top:30px}
@@ -171,6 +171,6 @@ fieldset.grupo legend{font-size:.85rem;color:var(--mudo);font-weight:500;margin-
   html{scroll-behavior:auto}
   .hero{height:100dvh}
   .hero h1 span{opacity:1;transform:none;animation:none}
-  .rv{opacity:1;transform:none;transition:none}
+  .js .rv{opacity:1;transform:none;transition:none}
   .faixa ul,.poste div,.ponto,.rolar span{animation:none}
 }

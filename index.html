@@ -11,7 +11,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<script>
+  // Esconde o conteúdo só enquanto as animações de entrada estiverem funcionando.
+  document.documentElement.classList.add("js");
+  addEventListener("load", function () {
+    setTimeout(function () { if (!window.__animacaoOk) document.documentElement.classList.remove("js"); }, 2500);
+  });
+</script>
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 <div class="progresso" aria-hidden="true"></div>
@@ -160,6 +167,6 @@
 
 <a class="flutuante" id="zapFlutuante" href="#agendar" aria-label="Agendar horário">Agendar</a>
 
-<script src="script.js"></script>
+<script src="script.js?v=3"></script>
 </body>
 </html>
