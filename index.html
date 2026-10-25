@@ -94,7 +94,7 @@
     <div class="wrap estreito">
       <p class="eyebrow rv">Agendamento</p>
       <h2 class="rv">Marque em menos de um minuto</h2>
-      <p class="rv txt">Escolha o serviço e o horário. Ao enviar, abrimos o WhatsApp com a mensagem pronta; a confirmação vem na hora.</p>
+      <p class="rv txt">Escolha o serviço, o dia e um dos horários livres. Ao enviar, abrimos o WhatsApp com a mensagem pronta; a confirmação vem na hora.</p>
       <form class="form rv" id="form" novalidate>
         <div class="campo">
           <label for="nome">Seu nome</label>
@@ -108,16 +108,15 @@
           <label for="barbeiro">Barbeiro</label>
           <select id="barbeiro" name="barbeiro"></select>
         </div>
-        <div class="linha">
-          <div class="campo">
-            <label for="data">Data</label>
-            <input id="data" name="data" type="date" required>
-          </div>
-          <div class="campo">
-            <label for="hora">Horário</label>
-            <select id="hora" name="hora" required></select>
-          </div>
-        </div>
+        <fieldset class="campo grupo">
+          <legend>Dia</legend>
+          <div class="dias" id="dias" role="radiogroup" aria-label="Escolha o dia"></div>
+        </fieldset>
+        <fieldset class="campo grupo">
+          <legend>Horário</legend>
+          <p class="legenda" id="legendaHoras" role="status" aria-live="polite"></p>
+          <div id="horas" role="radiogroup" aria-label="Horários disponíveis"></div>
+        </fieldset>
         <p class="resumo" id="resumo" role="status" aria-live="polite"></p>
         <p class="erro" id="erro" role="alert" hidden></p>
         <button class="btn btn-ouro cheio" type="submit">Agendar pelo WhatsApp</button>

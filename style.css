@@ -129,6 +129,28 @@ input:focus,select:focus{outline:none;border-color:var(--ouro);box-shadow:0 0 0 
 .erro{background:rgba(179,38,30,.15);border:1px solid rgba(179,38,30,.5);color:#ffb4ad;padding:10px 14px;border-radius:12px;font-size:.92rem}
 .aviso{font-size:.78rem;color:var(--mudo);text-align:center}
 
+/* escolha de dia e horário */
+fieldset.grupo{border:0;min-width:0}
+fieldset.grupo legend{font-size:.85rem;color:var(--mudo);font-weight:500;margin-bottom:8px}
+.chip input{position:absolute;opacity:0;pointer-events:none}
+.chip{position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;border:1.5px solid var(--linha);border-radius:14px;background:var(--bg);color:var(--txt);transition:border-color .2s,background .2s,transform .15s;user-select:none}
+.chip:hover{border-color:var(--ouro)}
+.chip:has(input:checked){background:linear-gradient(135deg,var(--ouro),var(--ouro2));border-color:var(--ouro2);color:#1A1405;font-weight:700}
+.chip:has(input:focus-visible){outline:2px solid var(--ouro2);outline-offset:2px}
+.chip.off{opacity:.38;cursor:not-allowed;text-decoration:line-through;border-style:dashed}
+.chip.off:hover{border-color:var(--linha)}
+.dias{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin}
+.chip.dia{flex:0 0 74px;min-height:92px;padding:8px 4px;line-height:1.15;text-decoration:none}
+.chip.dia.off{text-decoration:none}
+.chip.dia strong{font-family:'Oswald',sans-serif;font-size:1.5rem}
+.chip.dia small{font-size:.72rem;text-transform:capitalize;opacity:.8}
+.chip.dia em{font-style:normal;font-size:.68rem;margin-top:3px;opacity:.85}
+.periodo{margin:12px 0 6px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro)}
+.horas{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px}
+.chip.hora{min-height:48px;font-variant-numeric:tabular-nums}
+.legenda{font-size:.85rem;color:var(--ouro2);margin-bottom:2px}
+.vazio{color:var(--mudo);font-size:.92rem}
+
 /* contato / mapa */
 .mapa{border:1px solid var(--linha);border-radius:20px;overflow:hidden;aspect-ratio:3/2;background:var(--card)}
 .mapa svg{width:100%;height:100%;display:block}

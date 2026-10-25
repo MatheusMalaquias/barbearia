@@ -4,6 +4,8 @@ const CONFIG = {
   whatsapp: "5511999999999",              // DDI + DDD + número, só dígitos
   endereco: "Rua Exemplo, 123 — Centro, São Paulo, SP",
   intervalo: 30,                          // minutos entre horários
+  almoco: ["12:00", "13:00"],             // pausa sem atendimento (ou null)
+  diasVisiveis: 14,                       // quantos dias aparecem para agendar
   servicos: [
     { nome: "Corte", desc: "Tesoura ou máquina, finalizado com pomada.", preco: 45, min: 40 },
     { nome: "Barba", desc: "Toalha quente, navalha e hidratação.", preco: 35, min: 30 },
@@ -66,53 +68,121 @@ $("#ano").textContent = new Date().getFullYear();
   else { el.textContent = h ? `Fechado agora · hoje ${h[0]} às ${h[1]}` : "Fechado hoje"; el.parentElement.classList.add("fechado"); }
 })();
 
-/* ===== Formulário ===== */
-const selServ = $("#servico"), selBarb = $("#barbeiro"), selHora = $("#hora"), inData = $("#data");
+/* ===== Formulário: dia e horários livres ===== */
+const selServ = $("#servico"), selBarb = $("#barbeiro"), boxDias = $("#dias"), boxHoras = $("#horas");
 selServ.innerHTML = CONFIG.servicos.map((s, i) => `<option value="${i}">${s.nome} — ${brl(s.preco)}</option>`).join("");
 selBarb.innerHTML = `<option value="">Sem preferência</option>` + CONFIG.barbeiros.map((b) => `<option>${b.nome}</option>`).join("");
 
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-inData.min = iso(new Date());
-const primeiroDiaAberto = () => { const d = new Date(); while (!CONFIG.horarios[d.getDay()]) d.setDate(d.getDate() + 1); return d; };
-inData.value = iso(primeiroDiaAberto());
+const doISO = (t) => new Date(t + "T12:00:00");
+const estado = { dia: "", hora: "" };
+let agenda = { fixos: {}, reservas: [] };   // ocupações vindas de agenda.json
 
-function montarHorarios() {
-  const d = new Date(inData.value + "T12:00:00");
-  const h = CONFIG.horarios[d.getDay()];
-  const duracao = CONFIG.servicos[selServ.value].min;
-  if (!h) { selHora.innerHTML = `<option value="">Fechado neste dia</option>`; return; }
-  const agora = new Date(), ehHoje = iso(agora) === inData.value, minAgora = agora.getHours() * 60 + agora.getMinutes();
-  const opts = [];
-  for (let m = minutos(h[0]); m + duracao <= minutos(h[1]); m += CONFIG.intervalo) {
+/* ocupações de um barbeiro em um dia: [{ini, fim}] em minutos */
+function ocupacoes(dataISO, barbeiro) {
+  const dow = doISO(dataISO).getDay();
+  const lista = [...(agenda.fixos[dow] || []), ...agenda.reservas.filter((r) => r.data === dataISO)];
+  return lista.filter((r) => r.barbeiro === barbeiro).map((r) => ({ ini: minutos(r.hora), fim: minutos(r.hora) + (r.min || CONFIG.intervalo) }));
+}
+const sobrepoe = (ini, fim, lista) => lista.some((o) => ini < o.fim && fim > o.ini);
+
+/* horários do dia para o serviço e barbeiro escolhidos: [{hora, livre, motivo}] */
+function horariosDoDia(dataISO) {
+  const h = CONFIG.horarios[doISO(dataISO).getDay()];
+  if (!h) return [];
+  const dur = CONFIG.servicos[selServ.value].min;
+  const agora = new Date(), ehHoje = iso(agora) === dataISO, minAgora = agora.getHours() * 60 + agora.getMinutes();
+  const escolhido = selBarb.value;
+  const equipe = escolhido ? [escolhido] : CONFIG.barbeiros.map((b) => b.nome);
+  const out = [];
+  for (let m = minutos(h[0]); m + dur <= minutos(h[1]); m += CONFIG.intervalo) {
+    const fim = m + dur;
+    if (CONFIG.almoco && sobrepoe(m, fim, [{ ini: minutos(CONFIG.almoco[0]), fim: minutos(CONFIG.almoco[1]) }])) continue;
     if (ehHoje && m <= minAgora + 15) continue;
-    opts.push(`<option>${hhmm(m)}</option>`);
+    const livre = equipe.some((b) => !sobrepoe(m, fim, ocupacoes(dataISO, b)));
+    out.push({ hora: hhmm(m), livre });
   }
-  selHora.innerHTML = opts.length ? opts.join("") : `<option value="">Sem horários neste dia</option>`;
+  return out;
+}
+
+function desenharDias() {
+  const base = new Date(), chips = [];
+  for (let i = 0; i < CONFIG.diasVisiveis; i++) {
+    const d = new Date(base); d.setDate(base.getDate() + i);
+    const t = iso(d), aberto = !!CONFIG.horarios[d.getDay()];
+    const rotulo = i === 0 ? "Hoje" : i === 1 ? "Amanhã" : DIAS[d.getDay()].slice(0, 3);
+    const livres = aberto ? horariosDoDia(t).filter((x) => x.livre).length : 0;
+    const desab = !aberto || livres === 0;
+    chips.push({ t, desab, html: `
+      <label class="chip dia ${desab ? "off" : ""}">
+        <input type="radio" name="dia" value="${t}" ${desab ? "disabled" : ""}>
+        <small>${rotulo}</small><strong>${d.getDate()}</strong><small>${d.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}</small>
+        <em>${!aberto ? "Fechado" : livres === 0 ? "Lotado" : `${livres} livres`}</em>
+      </label>` });
+  }
+  if (!estado.dia || chips.find((c) => c.t === estado.dia)?.desab) estado.dia = chips.find((c) => !c.desab)?.t || "";
+  boxDias.innerHTML = chips.map((c) => c.html.replace(`value="${c.t}"`, `value="${c.t}"${c.t === estado.dia ? " checked" : ""}`)).join("");
+}
+
+function desenharHoras() {
+  const lista = estado.dia ? horariosDoDia(estado.dia) : [];
+  const livres = lista.filter((x) => x.livre);
+  if (!livres.some((x) => x.hora === estado.hora)) estado.hora = "";
+  const periodo = (h) => (minutos(h) < 12 * 60 ? "Manhã" : minutos(h) < 18 * 60 ? "Tarde" : "Noite");
+  const grupos = {};
+  lista.forEach((x) => (grupos[periodo(x.hora)] ||= []).push(x));
+  boxHoras.innerHTML = Object.entries(grupos).map(([nome, itens]) => `
+    <p class="periodo">${nome}</p>
+    <div class="horas">${itens.map((x) => `
+      <label class="chip hora ${x.livre ? "" : "off"}">
+        <input type="radio" name="hora" value="${x.hora}" ${x.livre ? "" : "disabled"} ${estado.hora === x.hora ? "checked" : ""}>
+        <span>${x.hora}</span>
+      </label>`).join("")}</div>`).join("") || `<p class="vazio">Sem horários neste dia.</p>`;
+  $("#legendaHoras").textContent = !lista.length ? "" : livres.length
+    ? `${livres.length} ${livres.length === 1 ? "horário livre" : "horários livres"}${selBarb.value ? ` com ${selBarb.value}` : ""}.${lista.length > livres.length ? " Os apagados já estão ocupados." : ""}`
+    : "Nenhum horário livre neste dia. Tente outro dia ou outro barbeiro.";
+  atualizarResumo();
 }
 
 function atualizarResumo() {
   const s = CONFIG.servicos[selServ.value];
-  $("#resumo").textContent = `${s.nome} · ${s.min} min · ${brl(s.preco)}`;
+  let t = `${s.nome} · ${s.min} min · ${brl(s.preco)}`;
+  if (estado.dia && estado.hora) {
+    const fim = hhmm(minutos(estado.hora) + s.min);
+    const dia = doISO(estado.dia).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+    t += ` — ${dia}, ${estado.hora} às ${fim}`;
+  }
+  $("#resumo").textContent = t;
 }
-[selServ].forEach((e) => e.addEventListener("change", () => { montarHorarios(); atualizarResumo(); }));
-inData.addEventListener("change", montarHorarios);
-montarHorarios(); atualizarResumo();
+
+function atualizarTudo() { desenharDias(); desenharHoras(); }
+selServ.addEventListener("change", atualizarTudo);
+selBarb.addEventListener("change", atualizarTudo);
+boxDias.addEventListener("change", (e) => { estado.dia = e.target.value; estado.hora = ""; desenharHoras(); });
+boxHoras.addEventListener("change", (e) => { estado.hora = e.target.value; atualizarResumo(); });
+
+fetch("agenda.json").then((r) => (r.ok ? r.json() : null)).catch(() => null).then((j) => {
+  if (j) agenda = { fixos: j.fixos || {}, reservas: j.reservas || [] };
+  atualizarTudo();
+});
+atualizarTudo();
 
 $("#form").addEventListener("submit", (e) => {
   e.preventDefault();
   const erro = $("#erro"); erro.hidden = true;
-  const nome = $("#nome").value.trim();
   const msg = (t) => { erro.textContent = t; erro.hidden = false; };
+  const nome = $("#nome").value.trim();
   if (nome.length < 2) return msg("Informe seu nome.");
-  if (!inData.value || !selHora.value) return msg("Escolha uma data e um horário disponíveis.");
+  if (!estado.dia) return msg("Não há dias com horário livre. Chame a barbearia no WhatsApp.");
+  if (!estado.hora) return msg("Escolha um dos horários livres.");
   const s = CONFIG.servicos[selServ.value];
-  const data = new Date(inData.value + "T12:00:00").toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
+  const data = doISO(estado.dia).toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long" });
   const texto = [
     `Olá! Quero agendar na ${CONFIG.nome}:`,
     `• Nome: ${nome}`,
     `• Serviço: ${s.nome} (${brl(s.preco)})`,
     `• Barbeiro: ${selBarb.value || "sem preferência"}`,
-    `• Quando: ${data}, às ${selHora.value}`,
+    `• Quando: ${data}, às ${estado.hora}`,
   ].join("\n");
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`, "_blank", "noopener");
 });
